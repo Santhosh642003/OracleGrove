@@ -30,7 +30,7 @@ The three perspectives come from one AI; agreement is not independent evidence o
 
 Keep credentials in ignored local environment files or hosted secret storage. Never place them in client code or commit them. Configure the same secret names in Sites before deployment. The supplied Sites manifest identifies this project's private hosting target; production builds use the bundled Sites workflow and Cloudflare Workers.
 
-`GEMINI_MODEL` defaults to `gemini-3.8-flash`. Safety blocks are handled without presenting generated advice; structured responses are validated before display. The sample story is explicitly labeled.
+`GEMINI_MODEL` defaults to `gemini-2.5-flash`. Safety blocks are handled without presenting generated advice; structured responses are validated before display. The sample story is explicitly labeled.
 
 ## Checks
 

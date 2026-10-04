@@ -17,7 +17,7 @@ The standalone build omits the Sites authentication and connector adapters. It r
 
 ## Add runtime secrets
 
-In the Worker's Settings → Variables and Secrets, add encrypted secrets named `GEMINI_API_KEY` and `ELEVENLABS_API_KEY`. Do not add these as public build variables. Optional variable: `GEMINI_MODEL=gemini-3.8-flash`.
+In the Worker's Settings → Variables and Secrets, add encrypted secrets named `GEMINI_API_KEY` and `ELEVENLABS_API_KEY`. Do not add these as public build variables. Optional variable: `GEMINI_MODEL=gemini-2.5-flash` (the default).
 
 Redeploy after saving secrets. Check the Worker URL with a synthetic question and narration before connecting the domain.
 

@@ -5,15 +5,20 @@ export const inputSchema=z.object({question:z.string().trim().min(8).max(1800),o
 export function secret(name:string){return String((env as unknown as Record<string,unknown>)[name]||process.env[name]||"").trim();}
 export function reply(body:unknown,status=200){return Response.json(body,{status,headers:{"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}});}
 const limits=new Map<string,{count:number;until:number}>();
-export function guard(request:Request,type:string,max=6){
+export function guard(request:Request,type:string,max=30){
 const origin=request.headers.get("origin");if(origin&&origin!==new URL(request.url).origin)return reply({error:"This request must come from the storybook."},403);
 if(!request.headers.get("content-type")?.includes("application/json"))return reply({error:"Please submit the storybook form."},415);
 if(Number(request.headers.get("content-length")||0)>12000)return reply({error:"Please shorten your question."},413);
 const now=Date.now();for(const [k,v]of limits)if(v.until<now)limits.delete(k);
 const ip=request.headers.get("cf-connecting-ip")||"local";
-const key=type+":"+ip;const v=limits.get(key)||{count:0,until:now+600000};
-if(v.count>=max)return reply({error:"Let the grove rest a moment. Please try again in a few minutes."},429);
-v.count++;limits.set(key,v);return null;
+const v=limits.get(type+":"+ip);
+if(v&&v.count>=max)return reply({error:"Let the grove rest a moment. Please try again in a few minutes."},429);
+return null;
+}
+/** Count a request that passed validation against the caller's limit. */
+export function spend(request:Request,type:string){
+const now=Date.now(),key=type+":"+(request.headers.get("cf-connecting-ip")||"local");
+const v=limits.get(key)||{count:0,until:now+600000};v.count++;limits.set(key,v);
 }
 export async function body(request:Request){const s=await request.text();if(s.length>12000)throw new Error("INPUT_SIZE");return JSON.parse(s);}
 function b64(bytes:Uint8Array){let s="";for(const b of bytes)s+=String.fromCharCode(b);return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}

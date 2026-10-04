@@ -18,9 +18,9 @@ export async function POST(request:Request){
       body:JSON.stringify({
         systemInstruction:{parts:[{text:councilInstructions}]},
         contents:[{role:"user",parts:[{text:JSON.stringify(input)}]}],
-        generationConfig:{maxOutputTokens:4096,responseFormat:{text:{mimeType:"APPLICATION_JSON",schema:{
+        generationConfig:{maxOutputTokens:8192,responseMimeType:"application/json",responseJsonSchema:{
           type:"object",properties:{safety:{type:"string",enum:["none","crisis","harm"]},council:{anyOf:[councilJson,{type:"null"}]}},required:["safety","council"],additionalProperties:false
-        }}}}
+        }}
       })
     });
     if(!response.ok)throw new Error("GEMINI_"+response.status);

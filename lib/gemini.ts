@@ -1,4 +1,4 @@
-export const DEFAULT_MODEL = "gemini-3.8-flash";
+export const DEFAULT_MODEL = "gemini-2.5-flash";
 export type GeminiResponse = {
   promptFeedback?: {blockReason?: string};
   candidates?: Array<{finishReason?:string;content?:{parts?:Array<{text?:string;thought?:boolean}>}}>;

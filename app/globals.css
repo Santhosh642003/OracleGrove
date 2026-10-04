@@ -55,3 +55,11 @@
 @keyframes bend{0%{--bend:0deg}35%{--bend:6deg}100%{--bend:0deg}}@keyframes strip-shade{50%,100%{opacity:1}}@keyframes strip-shade-late{0%,50%{opacity:1}100%{opacity:0}}
 @media(max-width:760px){.masthead{flex-wrap:wrap;row-gap:6px}}
 @media(prefers-reduced-motion:reduce){.strips{display:none}}
+
+.more-hint{margin-top:14px;align-self:flex-start;max-width:calc(100% - 64px);text-align:left;font-style:italic;animation:hint-sway 2.4s ease-in-out infinite}.more-hint:disabled{animation:none}
+.ink-button.nudge{animation:nudge-pulse 2.2s ease-in-out infinite}.ink-button.nudge:disabled{animation:none}
+.step-dots{display:inline-flex;gap:6px;margin-right:10px;vertical-align:middle}.step-dots i{height:8px;width:8px;border-radius:50%;border:1px solid #234843;background:transparent}.step-dots i.on{background:#234843}
+.page-corner{position:absolute;right:0;bottom:0;width:58px;height:58px;border:0;padding:0;cursor:pointer;z-index:5;background:linear-gradient(315deg,transparent 0 50%,#e4d6b3 50% 62%,#b9a679 100%);border-radius:0 0 8px 0;box-shadow:-3px -3px 10px #3a29112e;transition:width .25s,height .25s;animation:corner-flutter 2.6s ease-in-out infinite}.page-corner:hover,.page-corner:focus-visible{width:84px;height:84px;animation:none}
+@keyframes hint-sway{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}@keyframes nudge-pulse{0%,100%{box-shadow:0 3px 0 #102f2b25,0 0 0 0 #e2a84388}50%{box-shadow:0 3px 0 #102f2b25,0 0 0 9px #e2a84300}}@keyframes corner-flutter{0%,100%{width:58px;height:58px}50%{width:70px;height:70px}}
+@media(prefers-reduced-motion:reduce){.more-hint,.ink-button.nudge,.page-corner{animation:none}}
+@media(max-width:760px){.page-corner{width:46px;height:46px}.page-corner:hover{width:46px;height:46px}.step-dots{margin-right:6px}}

@@ -1,0 +1,5 @@
+Page-turn sound effects, both by MATRIXXX_ on Freesound, licensed CC0 1.0 (public domain).
+Re-encoded to mono MP3 with a short fade-out; otherwise unmodified.
+
+page-turn-forward.mp3  <- "Page Turn 03.wav"  https://freesound.org/people/MATRIXXX_/sounds/397550
+page-turn-back.mp3     <- "Page Turn 02.wav"  https://freesound.org/people/MATRIXXX_/sounds/397549

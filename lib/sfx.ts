@@ -28,39 +28,25 @@ function thump(c:AudioContext,t:number,volume:number){
   hp.type="highpass";hp.frequency.value=2500;tg.gain.setValueAtTime(volume*0.5,t);tg.gain.exponentialRampToValueAtTime(0.0001,t+0.05);
   tick.connect(hp).connect(tg).connect(c.destination);tick.start(t);tick.stop(t+0.06);
 }
-/** Crackly paper rustle: grain-modulated, differentiated noise plus sparse crinkle clicks. */
-function rustle(c:AudioContext,t:number,length:number,volume:number,center:number){
-  const rate=c.sampleRate,n=Math.ceil(rate*length),buffer=c.createBuffer(1,n,rate),data=buffer.getChannelData(0);
-  let grain=0,left=0,prev=0;
-  for(let i=0;i<n;i++){
-    const x=i/n;
-    if(left--<=0){grain=Math.pow(Math.random(),2.2);left=Math.floor(rate*(0.002+Math.random()*0.012));}
-    const env=Math.pow(Math.sin(Math.PI*Math.pow(x,0.7)),1.3);
-    const white=Math.random()*2-1,edge=white-prev;prev=white;
-    data[i]=edge*0.5*grain*env;
-    if(Math.random()<0.0009)data[i]+=(Math.random()*2-1)*0.9*env;
-  }
-  const src=c.createBufferSource(),hp=c.createBiquadFilter(),peak=c.createBiquadFilter(),lp=c.createBiquadFilter(),gain=c.createGain();
-  src.buffer=buffer;hp.type="highpass";hp.frequency.value=900;
-  peak.type="peaking";peak.frequency.value=center;peak.Q.value=0.8;peak.gain.value=6;
-  lp.type="lowpass";lp.frequency.value=9000;gain.gain.value=volume;
-  src.connect(hp).connect(peak).connect(lp).connect(gain).connect(c.destination);src.start(t);
+const samples:Partial<Record<"forward"|"back",AudioBuffer>>={};
+const sampleJobs:Partial<Record<"forward"|"back",Promise<void>>>={};
+function loadSample(c:AudioContext,direction:"forward"|"back"){
+  return sampleJobs[direction]??=fetch("/audio/page-turn-"+direction+".mp3").then(r=>r.arrayBuffer()).then(b=>c.decodeAudioData(b)).then(buffer=>{samples[direction]=buffer;}).catch(()=>{delete sampleJobs[direction];});
 }
-/** The soft "pap" of a page settling. */
-function flap(c:AudioContext,t:number,volume:number){
-  const src=noise(c,0.09),lp=c.createBiquadFilter(),g=c.createGain();
-  lp.type="lowpass";lp.frequency.value=1800;g.gain.setValueAtTime(volume,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.08);
-  src.connect(lp).connect(g).connect(c.destination);src.start(t);src.stop(t+0.09);
-  const osc=c.createOscillator(),og=c.createGain();
-  osc.type="sine";osc.frequency.setValueAtTime(95,t);osc.frequency.exponentialRampToValueAtTime(55,t+0.1);
-  og.gain.setValueAtTime(volume*0.35,t);og.gain.exponentialRampToValueAtTime(0.0001,t+0.12);
-  osc.connect(og).connect(c.destination);osc.start(t);osc.stop(t+0.13);
+/** Warm the page-turn recordings so the first turn plays without delay. */
+export function preload(){
+  const c=ac();if(!c)return;void loadSample(c,"forward");void loadSample(c,"back");
 }
-/** A paper page turning: a lifting rustle, then a soft flap as it lands. */
-export function turn(direction:"forward"|"back",landMs:number){
-  const c=ac();if(!c)return;const t=c.currentTime+0.02,land=Math.max(0.5,landMs/1000-0.1);
-  if(direction==="forward"){rustle(c,t,land,0.55,3400);flap(c,t+land-0.02,0.12);}
-  else{rustle(c,t,land*0.92,0.5,2600);flap(c,t+land*0.92-0.02,0.1);}
+/** A recorded paper page turn (CC0, see public/audio/CREDITS.txt). */
+export function turn(direction:"forward"|"back"){
+  const c=ac();if(!c)return;
+  const play=()=>{
+    const buffer=samples[direction];if(!buffer)return;
+    const src=c.createBufferSource(),gain=c.createGain();
+    src.buffer=buffer;src.playbackRate.value=0.97+Math.random()*0.06;gain.gain.value=0.9;
+    src.connect(gain).connect(c.destination);src.start();
+  };
+  if(samples[direction])play();else void loadSample(c,direction).then(play);
 }
 /** The cover swinging open. */
 export function open(){

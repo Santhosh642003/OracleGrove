@@ -30,7 +30,7 @@
 .cursor-light{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(180px circle at var(--cursor-x,-500px) var(--cursor-y,-500px),#ffc76414,transparent 100%);will-change:background}
 .turning-leaf{position:absolute;top:0;bottom:0;width:50%;transform-style:preserve-3d;backface-visibility:visible;will-change:transform;z-index:10;pointer-events:none;animation-duration:1.15s;animation-fill-mode:forwards;animation-timing-function:cubic-bezier(.45,.02,.2,1)}.turning-leaf.forward{left:50%;transform-origin:left center;animation-name:turn-forward}.turning-leaf.back{left:0;transform-origin:right center;animation-name:turn-back}
 .leaf-front,.leaf-back{position:absolute;inset:0;background:#f1e7d0 url('/art/cream-watercolor-paper-2048.png') center/700px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}.forward .leaf-front,.forward .leaf-back{border-radius:0 8px 8px 0}.back .leaf-front,.back .leaf-back{border-radius:8px 0 0 8px}.leaf-back{transform:rotateY(180deg)}
-.rich .leaf-front,.rich .leaf-back{background:none}.leaf-paper{position:absolute!important;inset:0;border-radius:inherit!important;overflow:hidden;box-shadow:none}
+.leaf-paper{position:absolute!important;top:0;bottom:0;border-radius:0!important;box-shadow:none}
 .leaf-front:after,.leaf-back:after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;animation:leaf-shade 1.15s ease both}.forward .leaf-front:after{background:linear-gradient(90deg,#2b170b66,transparent 70%)}.forward .leaf-back:after{background:linear-gradient(270deg,#2b170b66,transparent 70%);animation-name:leaf-shade-late}.back .leaf-front:after{background:linear-gradient(270deg,#2b170b66,transparent 70%)}.back .leaf-back:after{background:linear-gradient(90deg,#2b170b66,transparent 70%);animation-name:leaf-shade-late}
 .is-turning .page-left:after,.is-turning .page-right:after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;animation:cast-shadow 1.15s ease both}.is-turning .page-left,.is-turning .page-right{position:relative}.is-turning .page-left:after{background:linear-gradient(270deg,#2b170b40,transparent 55%)}.is-turning .page-right:after{background:linear-gradient(90deg,#2b170b40,transparent 55%)}
 .departing .closed-book{transform-origin:left center;animation:open-cover .85s ease both}.departing .cover-lettering{pointer-events:none}.snow-puff{position:absolute;left:50%;bottom:0;pointer-events:none}.snow-puff i{position:absolute;height:4px;width:4px;background:#f2f4ed;border-radius:50%;opacity:0;filter:blur(.5px);animation:snow-burst 1s calc(1s + var(--delay)) ease-out both}
@@ -43,3 +43,15 @@
 .portrait img{mix-blend-mode:multiply}.book-navigation{color:#fff2d6;text-shadow:0 1px 4px #0b142d}.grove-footer{color:#fff2d6;text-shadow:0 1px 4px #0b142d}
 
 .sound-control.effects-control{margin-left:8px}@media(max-width:760px){.turning-leaf{display:none}.is-turning .paper{animation:compact-turn 1.15s ease both}.effects-control{font-size:12px;padding:7px 11px;margin-left:4px}}@keyframes compact-turn{0%{opacity:1;transform:none}45%{opacity:0;transform:translateX(-14px)}55%{opacity:0;transform:translateX(14px)}100%{opacity:1;transform:none}}
+
+@property --bend{syntax:"<angle>";inherits:true;initial-value:0deg}
+.strips.forward{animation-name:turn-forward,bend}.strips.back{animation-name:turn-back,bend}.strips{animation-timing-function:cubic-bezier(.45,.02,.2,1),ease-in-out}
+.strip{position:absolute;top:0;bottom:0;width:calc(var(--sw) + 1px);transform-style:preserve-3d}
+.forward .strip{left:var(--sw);transform-origin:left center;transform:rotateY(var(--bend))}.forward>.strip{left:0;transform:none}
+.back .strip{right:var(--sw);transform-origin:right center;transform:rotateY(calc(var(--bend) * -1))}.back>.strip{right:0;transform:none}
+.sf,.sb{position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:#f1e7d0}.sb{transform:rotateY(180deg)}
+.sf:after,.sb:after{content:"";position:absolute;inset:0;background:linear-gradient(var(--ang),rgb(43 23 11 / var(--a0)),rgb(43 23 11 / var(--a1)));opacity:0;pointer-events:none;animation:strip-shade 1.15s ease both}.sb:after{animation-name:strip-shade-late}
+.forward .sf,.back .sb{--ang:90deg}.forward .sb,.back .sf{--ang:270deg}
+@keyframes bend{0%{--bend:0deg}35%{--bend:6deg}100%{--bend:0deg}}@keyframes strip-shade{50%,100%{opacity:1}}@keyframes strip-shade-late{0%,50%{opacity:1}100%{opacity:0}}
+@media(max-width:760px){.masthead{flex-wrap:wrap;row-gap:6px}}
+@media(prefers-reduced-motion:reduce){.strips{display:none}}

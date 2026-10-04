@@ -49,3 +49,51 @@ export function chime(){
     osc.connect(gain).connect(c.destination);osc.start(start);osc.stop(start+0.75);
   });
 }
+
+// ---- Ambient music: a slow generative pad with sparse bell notes, all synthesized. ----
+let bus:GainNode|null=null,duckGain:GainNode|null=null,ambientOn=false,ambientTimer=0,chordIndex=0;
+const chords=[[110,164.81,261.63,392],[87.31,130.81,220,329.63],[130.81,196,329.63,493.88],[98,146.83,246.94,369.99]];
+const bellNotes=[440,493.88,587.33,659.25,783.99,880];
+function ambientBus(c:AudioContext){
+  if(bus&&duckGain)return bus;
+  bus=c.createGain();bus.gain.value=0;duckGain=c.createGain();
+  const lp=c.createBiquadFilter(),delay=c.createDelay(1.5),feedback=c.createGain(),dlp=c.createBiquadFilter();
+  lp.type="lowpass";lp.frequency.value=1800;delay.delayTime.value=0.55;feedback.gain.value=0.38;dlp.type="lowpass";dlp.frequency.value=1400;
+  bus.connect(lp);lp.connect(duckGain);lp.connect(delay);delay.connect(dlp);dlp.connect(feedback);feedback.connect(delay);dlp.connect(duckGain);duckGain.connect(c.destination);
+  return bus;
+}
+function padNote(c:AudioContext,out:AudioNode,t:number,freq:number,length:number){
+  for(const [type,detune,level] of [["sine",-4,0.5],["triangle",5,0.18]] as const){
+    const osc=c.createOscillator(),gain=c.createGain();
+    osc.type=type;osc.frequency.value=freq;osc.detune.value=detune;
+    gain.gain.setValueAtTime(0.0001,t);gain.gain.linearRampToValueAtTime(level*0.22,t+3.2);gain.gain.linearRampToValueAtTime(0.0001,t+length);
+    osc.connect(gain).connect(out);osc.start(t);osc.stop(t+length+0.1);
+  }
+}
+function bellNote(c:AudioContext,out:AudioNode,t:number,freq:number){
+  const osc=c.createOscillator(),gain=c.createGain();
+  osc.type="sine";osc.frequency.value=freq;
+  gain.gain.setValueAtTime(0.0001,t);gain.gain.exponentialRampToValueAtTime(0.06,t+0.03);gain.gain.exponentialRampToValueAtTime(0.0001,t+3.2);
+  osc.connect(gain).connect(out);osc.start(t);osc.stop(t+3.3);
+}
+export function startAmbient(){
+  const c=ac();if(!c||ambientOn)return;
+  ambientOn=true;const out=ambientBus(c),now=c.currentTime;
+  out.gain.cancelScheduledValues(now);out.gain.setValueAtTime(out.gain.value,now);out.gain.linearRampToValueAtTime(0.6,now+4);
+  const step=()=>{
+    if(!ambientOn)return;
+    const t=c.currentTime+0.05;
+    for(const f of chords[chordIndex++%chords.length])padNote(c,out,t,f,12);
+    for(const off of [2.5,5.5,8.5])if(Math.random()<0.75)bellNote(c,out,t+off+Math.random()*1.2,bellNotes[Math.floor(Math.random()*bellNotes.length)]);
+    ambientTimer=window.setTimeout(step,10000);
+  };
+  step();
+}
+export function stopAmbient(){
+  ambientOn=false;window.clearTimeout(ambientTimer);
+  if(ctx&&bus){const now=ctx.currentTime;bus.gain.cancelScheduledValues(now);bus.gain.setTargetAtTime(0,now,0.6);}
+}
+/** Lower the music while narration is playing. */
+export function duckAmbient(on:boolean){
+  if(ctx&&duckGain)duckGain.gain.setTargetAtTime(on?0.3:1,ctx.currentTime,0.4);
+}
